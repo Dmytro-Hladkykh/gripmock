@@ -110,7 +110,7 @@ func (m *SimpleMocker) convertToMap(msg proto.Message) map[string]interface{} {
 		}
 
 		fieldName := string(fd.Name())
-		
+
 		// Handle repeated fields
 		if fd.IsList() {
 			list := value.List()
@@ -175,7 +175,6 @@ func (m *SimpleMocker) convertSingleValue(fd protoreflect.FieldDescriptor, value
 	}
 }
 
-
 func (m *SimpleMocker) processHeaders(md metadata.MD) map[string]interface{} {
 	if len(md) == 0 {
 		return nil
@@ -214,4 +213,3 @@ func (m *SimpleMocker) newOutputMessage(data map[string]interface{}, outputDesc 
 
 	return msg, nil
 }
-

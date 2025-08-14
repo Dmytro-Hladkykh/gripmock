@@ -10,8 +10,7 @@ import (
 	"time"
 )
 
-// MultiServerManager manages multiple embedded gripmock servers 
-// Similar to your docker-compose setup with multiple gripmock instances
+// MultiServerManager manages multiple embedded gripmock servers
 type MultiServerManager struct {
 	servers map[int]*EmbeddedMocker // map[port]*EmbeddedMocker
 	mu      sync.RWMutex
@@ -32,7 +31,6 @@ func NewMultiServerManager() *MultiServerManager {
 }
 
 // StartServers starts multiple gripmock servers with the given configurations
-// This replaces your docker-compose setup
 func (m *MultiServerManager) StartServers(ctx context.Context, configs []ServerConfig) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -83,7 +81,7 @@ func (m *MultiServerManager) StopAll() {
 	m.servers = make(map[int]*EmbeddedMocker)
 }
 
-// AddStub adds a stub to all running servers (replicates your multi-port behavior)
+// AddStub adds a stub to all running servers
 func (m *MultiServerManager) AddStub(service, method string, input, output interface{}) error {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
@@ -157,16 +155,16 @@ func discoverProtoFiles(protoDir string) ([]string, error) {
 	}
 
 	var protoFiles []string
-	
+
 	err := filepath.Walk(protoDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
-		
+
 		if !info.IsDir() && strings.HasSuffix(strings.ToLower(info.Name()), ".proto") {
 			protoFiles = append(protoFiles, path)
 		}
-		
+
 		return nil
 	})
 

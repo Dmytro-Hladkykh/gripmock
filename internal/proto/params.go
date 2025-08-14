@@ -1,4 +1,4 @@
-package domain
+package proto
 
 // Arguments represents the configuration for protobuf file processing.
 type Arguments struct {

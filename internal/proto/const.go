@@ -1,4 +1,4 @@
-package domain
+package proto
 
 import healthv1 "google.golang.org/grpc/health/grpc_health_v1"
 

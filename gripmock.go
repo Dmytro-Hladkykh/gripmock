@@ -15,7 +15,7 @@ import (
 	"google.golang.org/protobuf/reflect/protoregistry"
 	"google.golang.org/protobuf/types/descriptorpb"
 
-	"github.com/Dmytro-Hladkykh/gripmock/internal/domain"
+	"github.com/Dmytro-Hladkykh/gripmock/internal/proto"
 )
 
 // Server represents a simplified gRPC mock server
@@ -159,10 +159,10 @@ func (s *Server) loadProtos(protoFiles []string) error {
 		return fmt.Errorf("no proto files specified")
 	}
 
-	params := domain.New(protoFiles, []string{})
+	params := proto.New(protoFiles, []string{})
 
 	// Load the proto descriptors and register them in global registry
-	descriptors, err := domain.Build(context.Background(), params.Imports(), params.ProtoPath())
+	descriptors, err := proto.Build(context.Background(), params.Imports(), params.ProtoPath())
 	if err != nil {
 		return fmt.Errorf("failed to build proto descriptors: %w", err)
 	}
@@ -190,9 +190,9 @@ func (s *Server) loadProtos(protoFiles []string) error {
 }
 
 func (s *Server) registerServices(ctx context.Context) error {
-	params := domain.New(s.protoFiles, []string{})
+	params := proto.New(s.protoFiles, []string{})
 
-	descriptors, err := domain.Build(ctx, params.Imports(), params.ProtoPath())
+	descriptors, err := proto.Build(ctx, params.Imports(), params.ProtoPath())
 	if err != nil {
 		return fmt.Errorf("failed to build descriptors: %w", err)
 	}

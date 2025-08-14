@@ -1,4 +1,4 @@
-package domain
+package proto
 
 import (
 	"context"
