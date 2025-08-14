@@ -4,12 +4,15 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/bavix/features"
 	"github.com/gripmock/stuber"
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/reflect/protodesc"
+	"google.golang.org/protobuf/reflect/protoregistry"
 	"google.golang.org/protobuf/types/descriptorpb"
 
 	"github.com/Dmytro-Hladkykh/gripmock/internal/domain"
@@ -158,10 +161,29 @@ func (s *Server) loadProtos(protoFiles []string) error {
 
 	params := domain.New(protoFiles, []string{})
 
-	// Load the proto descriptors
-	_, err := domain.Build(context.Background(), params.Imports(), params.ProtoPath())
+	// Load the proto descriptors and register them in global registry
+	descriptors, err := domain.Build(context.Background(), params.Imports(), params.ProtoPath())
 	if err != nil {
 		return fmt.Errorf("failed to build proto descriptors: %w", err)
+	}
+
+	// Register file descriptors in global registry
+	for _, descriptor := range descriptors {
+		for _, file := range descriptor.GetFile() {
+			if _, err := protoregistry.GlobalFiles.FindFileByPath(file.GetName()); err != nil {
+				// File not found in registry, register it
+				fileDesc, err := protodesc.NewFile(file, protoregistry.GlobalFiles)
+				if err != nil {
+					return fmt.Errorf("failed to create file descriptor for %s: %w", file.GetName(), err)
+				}
+				if err := protoregistry.GlobalFiles.RegisterFile(fileDesc); err != nil {
+					// Ignore if already registered
+					if !strings.Contains(err.Error(), "already registered") {
+						return fmt.Errorf("failed to register file descriptor for %s: %w", file.GetName(), err)
+					}
+				}
+			}
+		}
 	}
 
 	return nil

@@ -72,9 +72,28 @@ func (m *SimpleMocker) streamHandler(srv interface{}, stream grpc.ServerStream) 
 }
 
 func (m *SimpleMocker) getMessageDescriptors() (protoreflect.MessageDescriptor, protoreflect.MessageDescriptor, error) {
-	// This is simplified - in a real implementation we would need to properly
-	// resolve message types from the service definition
-	return nil, nil, fmt.Errorf("message descriptor resolution not implemented")
+	// Try to resolve service and method descriptors from the global registry
+	serviceDesc, err := protoregistry.GlobalFiles.FindDescriptorByName(protoreflect.FullName(m.fullServiceName))
+	if err != nil {
+		// If not found in registry, create basic message descriptors
+		return nil, nil, fmt.Errorf("service descriptor not found: %v", err)
+	}
+
+	service, ok := serviceDesc.(protoreflect.ServiceDescriptor)
+	if !ok {
+		return nil, nil, fmt.Errorf("not a service descriptor: %s", m.fullServiceName)
+	}
+
+	// Find the method
+	methodDesc := service.Methods().ByName(protoreflect.Name(m.methodName))
+	if methodDesc == nil {
+		return nil, nil, fmt.Errorf("method not found: %s", m.methodName)
+	}
+
+	inputDesc := methodDesc.Input()
+	outputDesc := methodDesc.Output()
+
+	return inputDesc, outputDesc, nil
 }
 
 func (m *SimpleMocker) convertToMap(msg proto.Message) map[string]interface{} {
