@@ -110,14 +110,36 @@ func (m *SimpleMocker) convertToMap(msg proto.Message) map[string]interface{} {
 		}
 
 		fieldName := string(fd.Name())
-		result[fieldName] = m.convertValue(fd, value)
+		
+		// Handle repeated fields
+		if fd.IsList() {
+			list := value.List()
+			arrayResult := make([]interface{}, list.Len())
+			for i := 0; i < list.Len(); i++ {
+				arrayResult[i] = m.convertSingleValue(fd, list.Get(i))
+			}
+			result[fieldName] = arrayResult
+		} else if fd.IsMap() {
+			// Handle map fields
+			mapValue := value.Map()
+			mapResult := make(map[string]interface{})
+			mapValue.Range(func(key protoreflect.MapKey, val protoreflect.Value) bool {
+				mapResult[key.String()] = m.convertSingleValue(fd.MapValue(), val)
+				return true
+			})
+			result[fieldName] = mapResult
+		} else {
+			// Handle single values
+			result[fieldName] = m.convertSingleValue(fd, value)
+		}
 		return true
 	})
 
 	return result
 }
 
-func (m *SimpleMocker) convertValue(fd protoreflect.FieldDescriptor, value protoreflect.Value) interface{} {
+// convertSingleValue handles conversion of individual values (not lists or maps)
+func (m *SimpleMocker) convertSingleValue(fd protoreflect.FieldDescriptor, value protoreflect.Value) interface{} {
 	switch fd.Kind() {
 	case protoreflect.BoolKind:
 		return value.Bool()
@@ -140,11 +162,19 @@ func (m *SimpleMocker) convertValue(fd protoreflect.FieldDescriptor, value proto
 	case protoreflect.EnumKind:
 		return string(fd.Enum().Values().ByNumber(value.Enum()).Name())
 	case protoreflect.MessageKind, protoreflect.GroupKind:
-		return m.convertToMap(value.Message().Interface())
+		if !value.IsValid() {
+			return nil
+		}
+		msg := value.Message()
+		if msg == nil {
+			return nil
+		}
+		return m.convertToMap(msg.Interface())
 	default:
 		return nil
 	}
 }
+
 
 func (m *SimpleMocker) processHeaders(md metadata.MD) map[string]interface{} {
 	if len(md) == 0 {
@@ -185,18 +215,3 @@ func (m *SimpleMocker) newOutputMessage(data map[string]interface{}, outputDesc 
 	return msg, nil
 }
 
-func getMessageDescriptor(messageType string) (protoreflect.MessageDescriptor, error) {
-	msgName := protoreflect.FullName(strings.TrimPrefix(messageType, "."))
-
-	desc, err := protoregistry.GlobalFiles.FindDescriptorByName(msgName)
-	if err != nil {
-		return nil, fmt.Errorf("message descriptor not found: %v", err)
-	}
-
-	msgDesc, ok := desc.(protoreflect.MessageDescriptor)
-	if !ok {
-		return nil, fmt.Errorf("not a message descriptor: %s", msgName)
-	}
-
-	return msgDesc, nil
-}
