@@ -15,7 +15,7 @@ import (
 	"google.golang.org/protobuf/reflect/protoregistry"
 	"google.golang.org/protobuf/types/descriptorpb"
 
-	"github.com/Dmytro-Hladkykh/gripmock/internal/proto"
+	"github.com/distributed-lab/gripmock/internal/proto"
 )
 
 // Server represents a simplified gRPC mock server
@@ -245,7 +245,6 @@ func (s *Server) registerServiceMethods(serviceDesc *grpc.ServiceDesc, svc *desc
 		}
 	}
 }
-
 
 // NewStub creates a new stub with the given service, method, input and output
 // User will need to create stuber.Stub manually for now

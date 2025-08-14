@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"log"
 	"time"
-	
-	gripmock "github.com/Dmytro-Hladkykh/gripmock"
+
+	gripmock "github.com/distributed-lab/gripmock"
 )
 
 func main() {
 	// Example usage of simplified gripmock
-	
+
 	// Create a server on port 9001 (no proto files for this example)
 	server, err := gripmock.NewServer(9001, []string{})
 	if err != nil {

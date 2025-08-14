@@ -1,4 +1,4 @@
-module github.com/Dmytro-Hladkykh/gripmock
+module github.com/distributed-lab/gripmock
 
 go 1.24
 
