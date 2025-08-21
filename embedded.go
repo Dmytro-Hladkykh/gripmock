@@ -72,6 +72,20 @@ func GetActivePorts() []int {
 	return globalManager.GetServerPorts()
 }
 
+// AddStubToPort adds a stub to a specific gripmock server by port
+func AddStubToPort(port int, service, method string, input, output interface{}) error {
+	if globalManager == nil {
+		return fmt.Errorf("embedded gripmock not initialized - call InitEmbeddedGripmock first")
+	}
+	
+	mocker, exists := globalManager.GetServer(port)
+	if !exists {
+		return fmt.Errorf("no server running on port %d", port)
+	}
+	
+	return mocker.AddStub(service, method, input, output)
+}
+
 // IsRunning returns true if all gripmock servers are running
 func IsRunning() bool {
 	if globalManager == nil {
