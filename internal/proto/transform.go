@@ -17,7 +17,7 @@ import (
 	"google.golang.org/protobuf/reflect/protoregistry"
 	"google.golang.org/protobuf/types/descriptorpb"
 
-	"github.com/distributed-lab/gripmock/internal/pbs"
+	"github.com/Dmytro-Hladkykh/gripmock/internal/pbs"
 )
 
 const (

@@ -15,7 +15,7 @@ import (
 	"google.golang.org/protobuf/reflect/protoregistry"
 	"google.golang.org/protobuf/types/descriptorpb"
 
-	"github.com/distributed-lab/gripmock/internal/proto"
+	"github.com/Dmytro-Hladkykh/gripmock/internal/proto"
 )
 
 // Server represents a simplified gRPC mock server
